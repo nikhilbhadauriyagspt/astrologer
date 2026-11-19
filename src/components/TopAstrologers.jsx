@@ -43,32 +43,64 @@ export default function TopAstrologers({
         )
         const newlyApproved = data.astrologers
           .filter((dbAstro) => !existingNames.has(dbAstro.name.toLowerCase()))
-          .map((dbAstro) => ({
-            id: `db-${dbAstro.id}`,
-            name: dbAstro.name,
-            hindiName: dbAstro.city || 'काशी ज्योतिषाचार्य',
-            title: dbAstro.qualification || 'Verified Vedic Acharya',
-            avatar:
-              'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=240&auto=format&fit=crop&q=80',
-            skills: dbAstro.specialty
-              ? dbAstro.specialty.split(',').map((s) => s.trim())
-              : ['Vedic Jyotish', 'Kundli Reading'],
-            categories: ['all', 'vedic', 'marriage', 'career'],
-            languages: dbAstro.languages || 'Hindi, English',
-            experience: `${dbAstro.experience_years || 10} Years`,
-            rating: Number(dbAstro.rating) || 4.9,
-            reviews: 'New Verified',
-            orders: `${dbAstro.total_orders || 120}+`,
-            price: Number(dbAstro.rate_per_min) || 30,
-            oldPrice: (Number(dbAstro.rate_per_min) || 30) + 12,
-            status:
-              (dbAstro.status || 'ONLINE').toLowerCase() === 'online'
-                ? 'online'
-                : 'busy',
-            waitTime: 'Instant',
-            badge: 'Admin Verified',
-            bio: dbAstro.bio,
-          }))
+          .map((dbAstro) => {
+            const baseRate = Number(dbAstro.rate_per_min) || 30
+            const photoUrl =
+              dbAstro.profile_photo && dbAstro.profile_photo.trim()
+                ? dbAstro.profile_photo
+                : 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=240&auto=format&fit=crop&q=80'
+            const skillList = [
+              ...(dbAstro.specialty ? dbAstro.specialty.split(',') : []),
+              ...(dbAstro.secondary_skills ? dbAstro.secondary_skills.split(',') : []),
+            ]
+              .map((s) => s.trim())
+              .filter(Boolean)
+
+            return {
+              id: `db-${dbAstro.id}`,
+              name: dbAstro.name,
+              hindiName: dbAstro.city || 'काशी ज्योतिषाचार्य',
+              title: dbAstro.specialty || dbAstro.qualification || 'Verified Vedic Acharya',
+              image: photoUrl,
+              avatar: photoUrl,
+              skills:
+                skillList.length > 0
+                  ? Array.from(new Set(skillList))
+                  : ['Vedic Jyotish', 'Kundli Reading'],
+              categories: ['all', 'vedic', 'marriage', 'career'],
+              languages: dbAstro.languages || 'Hindi, English',
+              exp: `${dbAstro.experience_years || 10} Yrs`,
+              experience: `${dbAstro.experience_years || 10} Years`,
+              chatMins: `${((Number(dbAstro.total_orders) || 120) * 12).toLocaleString('en-IN')} mins`,
+              rating: Number(dbAstro.rating) || 4.9,
+              reviews: String(dbAstro.total_orders || '120+'),
+              orders: `${dbAstro.total_orders || 120}+`,
+              price: `₹${baseRate}/min`,
+              originalPrice: `₹${baseRate + 12}/min`,
+              oldPrice: baseRate + 12,
+              perMinRate: `Chat ₹${dbAstro.chat_rate || baseRate}/m • Audio ₹${dbAstro.audio_rate || baseRate + 5}/m • Video ₹${dbAstro.video_rate || baseRate + 15}/m`,
+              status:
+                (dbAstro.status || 'ONLINE').toLowerCase() === 'online'
+                  ? 'online'
+                  : 'busy',
+              waitTime: 'Instant',
+              badge: 'Admin Verified',
+              education: `${dbAstro.qualification || 'Jyotish Acharya'}${
+                dbAstro.university_gurukul ? ` – ${dbAstro.university_gurukul}` : ''
+              }`,
+              about:
+                dbAstro.bio ||
+                `${dbAstro.name} is a verified Vedic Astrologer from ${dbAstro.city || 'Varanasi'} with ${dbAstro.experience_years || 10}+ years of experience.`,
+              bio: dbAstro.bio,
+              highlights: [
+                dbAstro.achievements ||
+                  `${dbAstro.experience_years || 10}+ years of authentic Vedic Jyotish & Kundli consultation`,
+                `Based in ${dbAstro.city || 'Varanasi'}${dbAstro.state ? `, ${dbAstro.state}` : ''}`,
+                `Verified Qualification: ${dbAstro.qualification || 'Jyotish Acharya'}`,
+              ],
+              clientReviews: ASTROLOGERS[0]?.clientReviews || [],
+            }
+          })
 
         if (newlyApproved.length > 0) {
           setAllAstrologers([...newlyApproved, ...ASTROLOGERS])

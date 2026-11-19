@@ -22,7 +22,41 @@ export default function AstrologerDetail({
   onSelectAstrologer,
   onStartConsultation,
 }) {
-  const current = astrologer || ASTROLOGERS[0]
+  const rawCurrent = astrologer || ASTROLOGERS[0]
+  const current = {
+    ...ASTROLOGERS[0],
+    ...rawCurrent,
+    image:
+      rawCurrent.image ||
+      rawCurrent.avatar ||
+      rawCurrent.profile_photo ||
+      ASTROLOGERS[0].image,
+    exp:
+      rawCurrent.exp ||
+      rawCurrent.experience ||
+      `${rawCurrent.experience_years || 10} Yrs`,
+    education:
+      rawCurrent.education ||
+      rawCurrent.qualification ||
+      ASTROLOGERS[0].education,
+    about:
+      rawCurrent.about ||
+      rawCurrent.bio ||
+      ASTROLOGERS[0].about,
+    skills:
+      Array.isArray(rawCurrent.skills) && rawCurrent.skills.length > 0
+        ? rawCurrent.skills
+        : ASTROLOGERS[0].skills,
+    highlights:
+      Array.isArray(rawCurrent.highlights) && rawCurrent.highlights.length > 0
+        ? rawCurrent.highlights
+        : ASTROLOGERS[0].highlights,
+    clientReviews:
+      Array.isArray(rawCurrent.clientReviews) &&
+      rawCurrent.clientReviews.length > 0
+        ? rawCurrent.clientReviews
+        : ASTROLOGERS[0].clientReviews,
+  }
   const relatedAcharyas = ASTROLOGERS.filter((a) => a.id !== current.id).slice(0, 3)
 
   return (
@@ -200,7 +234,7 @@ export default function AstrologerDetail({
                   Core Specializations
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {current.skills.map((skill) => (
+                  {(current.skills || []).map((skill) => (
                     <span
                       key={skill}
                       className="px-3.5 py-1.5 rounded-xl bg-[#FFF7ED] border border-orange-200 text-xs font-bold text-[#9A3412]"
@@ -217,7 +251,7 @@ export default function AstrologerDetail({
                   Why Consult {current.name}
                 </div>
                 <div className="grid grid-cols-1 gap-2.5">
-                  {current.highlights.map((item) => (
+                  {(current.highlights || []).map((item) => (
                     <div
                       key={item}
                       className="flex items-center gap-2.5 text-xs sm:text-sm text-[#2C1408]"
@@ -248,10 +282,7 @@ export default function AstrologerDetail({
               </div>
 
               <div className="space-y-3.5">
-                {(current.clientReviews.length > 0
-                  ? current.clientReviews
-                  : ASTROLOGERS[0].clientReviews
-                ).map((rev, i) => (
+                {(current.clientReviews || []).map((rev, i) => (
                   <div
                     key={i}
                     className="p-4 rounded-2xl bg-[#FFFDF9] border border-amber-900/10 space-y-2"
